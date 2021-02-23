@@ -3,8 +3,8 @@ provider "kubernetes" {
   config_context = "minikube"
 }
 
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace" "example2" {
   metadata {
-    name = "hello-emilio"
+    name = "hello-luke"
   }
 }
