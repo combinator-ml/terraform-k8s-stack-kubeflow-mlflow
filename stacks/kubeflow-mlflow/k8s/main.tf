@@ -23,15 +23,16 @@ provider "k8s" {
 provider "helm" {
   kubernetes {
    config_path    = "/root/.kube/config"
-    config_context = "minikube"
+   config_context = "minikube"
  }
 }
 
-resource "kubernetes_namespace" "example2" {
+resource "kubernetes_namespace" "ns" {
   metadata {
-    name = "hello-luke"
+    name = "kf"
   }
 }
+
 module "kubeflow" {
   providers = {
     kubernetes = kubernetes
@@ -49,4 +50,133 @@ module "kubeflow" {
   domain_name         = "foo.local"
   letsencrypt_email   = "foo@bar.local"
   kubeflow_components = ["pipelines"]
+}
+
+module "mlflow" {
+  source  = "terraform-module/release/helm"
+  repository = "https://larribas.me/helm-charts"
+  namespace  = kubernetes_namespace.ns.metadata.0.name
+
+  app = {
+    chart      = "mlflow"
+    version    = "1.0.1"
+    name       = "mlflow"
+    force_update  = true
+    wait          = false
+    recreate_pods = false
+    deploy        = 1
+  }
+
+  values = [
+    "${file("conf/mlflow_values.yaml")}"
+  ]
+
+  set = [
+    {
+  #    name  = "backendStore.filepath"
+  #    value = "/file/"
+  #  },{
+  #    name  = "defaultArtifactRoot"
+  #    value = "/file/"
+  #  },{
+      name  = "prometheus"
+      value = "true"
+    },{
+      name  = "service.port"
+      value = 5000
+    }
+  ]
+}
+
+module "minio" {
+  source  = "terraform-module/release/helm"
+  repository = "https://helm.min.io/"
+  namespace  = kubernetes_namespace.ns.metadata.0.name
+
+  app = {
+    chart      = "minio"
+    version    = "8.0.9"
+    name       = "minio"
+    force_update  = true
+    wait          = false
+    recreate_pods = false
+    deploy        = 1
+  }
+
+  values = [
+    "${file("conf/minio_values.yaml")}"
+  ]
+
+  set = [
+    {
+      name  = "accessKey"
+      value = "minio"
+    },{
+      name  = "secretKey"
+      value = "minio-minio"
+    },{
+      name  = "generate-name"
+      value = "minio/minio"
+    },{
+      name  = "service.port"
+      value = 9000
+    }
+  ]
+}
+
+module "mysql" {
+  source  = "terraform-module/release/helm"
+  repository = "https://charts.bitnami.com/bitnami"
+  namespace  = kubernetes_namespace.ns.metadata.0.name
+
+  app = {
+    chart      = "mysql"
+    version    = "8.0.0"
+    name       = "mysql"
+    force_update  = true
+    wait          = false
+    recreate_pods = false
+    deploy        = 1
+  }
+
+  values = [
+    "${file("conf/mysql_values.yaml")}"
+  ]
+
+}
+
+resource "kubernetes_service" "mlflow-external" {
+  metadata {
+    name      = "mlflow-external"
+    namespace = kubernetes_namespace.ns.metadata.0.name
+  }
+  spec {
+    selector = {
+      app = "mlflow"
+    }
+    type = "NodePort"
+    port {
+      node_port   = 31380
+      port        = 5000
+      target_port = 5000
+    }
+  }
+}
+
+resource "kubernetes_service" "minio-external" {
+  metadata {
+    name      = "minio-external"
+    namespace = kubernetes_namespace.ns.metadata.0.name
+  }
+  spec {
+    selector = {
+      app = "minio"
+    }
+    type = "NodePort"
+    port {
+      node_port   = 30650
+      port        = 9000
+      target_port = 9000
+    }
+  }
 }
