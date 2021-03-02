@@ -1,0 +1,20 @@
+#!/bin/bash
+set -xeuo pipefail
+
+testctl get
+export KUBECONFIG=$(pwd)/kubeconfig
+./testctl-rsync.sh main.tf /root
+./testctl-rsync.sh conf /root/
+
+# How to iterate quickly without getting a new VM every time:
+#./testctl-ssh.sh -- /snap/bin/juju destroy model kf
+#./testctl-ssh.sh -- /snap/bin/juju destroy controller
+#./testctl-ssh.sh -- /snap/bin/juju unregister controller
+
+./testctl-ssh.sh -- terraform init
+./testctl-ssh.sh -- terraform apply -auto-approve
+
+echo "Try: testctl ssh -- /snap/bin/juju debug-log --include mlflow"
+#echo "Try: testctl ssh -- kubectl logs mlflow-operator-0 -n kf"
+
+#./testctl-ssh.sh -- /snap/bin/juju deploy --resource oci-image=gcr.io/kubeflow-images-public/admission-webhook:vmaster-gaf96e4e3 ./mlflow.charm
