@@ -158,8 +158,8 @@ resource "kubernetes_service" "mlflow-external" {
     type = "NodePort"
     port {
       node_port   = 31380
-      port        = 5000
-      target_port = 5000
+      port        = 80
+      target_port = 80
     }
   }
 }
