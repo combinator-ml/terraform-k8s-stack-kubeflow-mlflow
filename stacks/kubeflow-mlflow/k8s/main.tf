@@ -152,6 +152,7 @@ resource "kubernetes_service" "mlflow-external" {
   }
   spec {
     selector = {
+      "app.kubernetes.io/instance" = "mlflow"
       "app.kubernetes.io/name" = "mlflow"
     }
     type = "NodePort"
@@ -170,7 +171,8 @@ resource "kubernetes_service" "minio-external" {
   }
   spec {
     selector = {
-      "app.kubernetes.io/name" = "minio"
+      "app" = "minio"
+      "release" = "minio"
     }
     type = "NodePort"
     port {
