@@ -43,6 +43,7 @@ module "kubeflow" {
   source  = "datarootsio/kubeflow/module"
   version = "~>0.12"
 
+
   #ingress_gateway_ip  = "10.20.30.40"
   use_cert_manager    = true
   install_istio        = true
@@ -73,17 +74,8 @@ module "mlflow" {
 
   set = [
     {
-  #    name  = "backendStore.filepath"
-  #    value = "/file/"
-  #  },{
-  #    name  = "defaultArtifactRoot"
-  #    value = "/file/"
-  #  },{
-      name  = "prometheus"
-      value = "true"
-    },{
-      name  = "service.port"
-      value = 5000
+      name  = "prometheus.expose"
+      value = true
     }
   ]
 }
@@ -181,4 +173,23 @@ resource "kubernetes_service" "minio-external" {
       target_port = 9000
     }
   }
+}
+
+resource "kubernetes_service" "kubeflow-external" {
+  metadata {
+    name      = "kubeflow-external"
+    namespace = "kubeflow"
+  }
+  spec {
+    selector = {
+      "app" = "centraldashboard"
+    }
+    type = "NodePort"
+    port {
+      node_port   = 30600
+      port        = 8082
+      target_port = 8082
+    }
+  }
+  depends_on = [module.kubeflow]
 }
