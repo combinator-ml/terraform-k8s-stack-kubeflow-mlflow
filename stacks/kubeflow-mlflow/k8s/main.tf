@@ -8,6 +8,7 @@ terraform {
       version = "= 1.13.3"
     }
   }
+  required_version = ">= 0.12"
 }
 
 provider "kubernetes" {
@@ -41,17 +42,18 @@ module "kubeflow" {
   }
 
   source  = "datarootsio/kubeflow/module"
-  version = "~>0.12"
+  version = "~>0.13.1"
 
-
-  #ingress_gateway_ip  = "10.20.30.40"
+  kubeflow_operator_version = "1.2.0"
+  kubeflow_version    = "1.1.0"
   use_cert_manager    = true
   install_istio        = true
   install_cert_manager = true
   domain_name         = "foo.local"
   letsencrypt_email   = "foo@bar.local"
-  kubeflow_components = ["pipelines"]
+  #kubeflow_components = ["jupyter", "pipelines"]
 }
+
 
 module "mlflow" {
   source  = "terraform-module/release/helm"
@@ -149,7 +151,7 @@ resource "kubernetes_service" "mlflow-external" {
     }
     type = "NodePort"
     port {
-      node_port   = 31380
+      node_port   = 30600
       port        = 80
       target_port = 80
     }
@@ -186,7 +188,7 @@ resource "kubernetes_service" "kubeflow-external" {
     }
     type = "NodePort"
     port {
-      node_port   = 30600
+      node_port   = 31380
       port        = 8082
       target_port = 8082
     }
