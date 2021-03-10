@@ -46,11 +46,11 @@ module "kubeflow" {
 
   kubeflow_operator_version = "1.2.0"
   kubeflow_version    = "1.1.0"
-  use_cert_manager    = true
+  use_cert_manager    = false
   install_istio        = true
   install_cert_manager = true
-  domain_name         = "foo.local"
-  letsencrypt_email   = "foo@bar.local"
+  domain_name         = "kubeflow.local"
+  letsencrypt_email   = "hello@combinator.ml"
   #kubeflow_components = ["jupyter", "pipelines"]
 }
 
@@ -177,20 +177,21 @@ resource "kubernetes_service" "minio-external" {
   }
 }
 
-resource "kubernetes_service" "kubeflow-external" {
+resource "kubernetes_service" "istio-external" {
   metadata {
-    name      = "kubeflow-external"
-    namespace = "kubeflow"
+    name      = "istio-external"
+    namespace = "istio-system"
   }
   spec {
     selector = {
-      "app" = "centraldashboard"
+      "app" = "istio-ingressgateway"
+      "istio" = "ingressgateway"
     }
     type = "NodePort"
     port {
       node_port   = 31380
-      port        = 8082
-      target_port = 8082
+      port        = 80
+      target_port = 8080
     }
   }
   depends_on = [module.kubeflow]
