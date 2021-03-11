@@ -33,7 +33,7 @@ base:
   kubernetes_version: v1.17.11
 runtime:
   cpus: 4
-  memory: 8GB
+  memory: 12GB
   disk: 50GB
 # How many ready VMs to keep running for instant testctl get
 prewarm_pool_size: 1
