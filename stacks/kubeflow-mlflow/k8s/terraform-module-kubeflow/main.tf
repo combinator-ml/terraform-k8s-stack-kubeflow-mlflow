@@ -55,4 +55,5 @@ module "istio" {
   use_cert_manager            = var.use_cert_manager
   certificate_name            = var.certificate_name
   istio_version               = var.istio_version
+// TODO: add an expose_http toggle here, which controls the http stanza in gateway-vs.yaml
 }
