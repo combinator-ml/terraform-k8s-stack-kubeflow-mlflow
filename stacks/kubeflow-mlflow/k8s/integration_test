@@ -15,12 +15,15 @@ export KUBECONFIG=$(pwd)/kubeconfig
 
 # workaround docker hub ratelimits
 # you get a regcred, you get a regcred!
-./testctl-ssh.sh -- bash regcreds.sh
+# TODO: move this into terraform so it's not so hacky!
+# runs in the background continuously trying to apply namespaces while things
+# start up...
+./testctl-ssh.sh -- bash regcreds.sh &
 
 ./testctl-ssh.sh -- terraform init
 ./testctl-ssh.sh -- terraform apply -auto-approve
 
-echo "Try: testctl ssh -- /snap/bin/juju debug-log --include mlflow"
-#echo "Try: testctl ssh -- kubectl logs mlflow-operator-0 -n kf"
+echo "try: testctl ssh -- /snap/bin/juju debug-log --include mlflow"
+#echo "try: testctl ssh -- kubectl logs mlflow-operator-0 -n kf"
 
 #./testctl-ssh.sh -- /snap/bin/juju deploy --resource oci-image=gcr.io/kubeflow-images-public/admission-webhook:vmaster-gaf96e4e3 ./mlflow.charm

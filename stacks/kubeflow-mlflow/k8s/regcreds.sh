@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xeuo pipefail
+set -euo pipefail
 for NS in \
     admin \
     auth \
@@ -14,7 +14,12 @@ for NS in \
     kube-system \
     kubeflow \
     kubeflow-operator; do
-        kubectl create ns $NS || echo "namespace $NS already existed"
-        kubectl patch serviceaccount -n $NS \
-            default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
+        (
+            while ! kubectl get ns $NS 2>/dev/null; do
+                echo "waiting for ns $NS to be created..."
+                sleep 10
+            done
+            kubectl patch serviceaccount -n $NS \
+                default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
+        ) &
 done
