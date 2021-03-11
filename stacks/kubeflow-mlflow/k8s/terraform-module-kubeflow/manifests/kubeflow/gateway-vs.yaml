@@ -50,7 +50,7 @@ spec:
   - kubeflow-gateway
   hosts:
   - "*"
-  - ${dns_record}.${domain_name}
+  #- ${dns_record}.${domain_name}
   http:
   - match:
     - uri:
@@ -73,7 +73,7 @@ spec:
   - kubeflow-gateway
   hosts:
   - "*"
-  - ${dns_record}.${domain_name}
+  #- ${dns_record}.${domain_name}
   http:
   - match:
     - method:
