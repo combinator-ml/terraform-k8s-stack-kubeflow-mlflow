@@ -90,7 +90,7 @@ for NS_SA in $NS_AND_SA ; do
             export NS=$(echo $NS_SA |cut -d , -f 1)
             export SA=$(echo $NS_SA |cut -d , -f 2)
             while ! kubectl get sa -n $NS $SA 2>/dev/null; do
-                echo "waiting for ns $NS to be created so we can patch regcreds for SA $SA in it..."
+                echo "waiting for sa $SA in ns $NS to be created so we can patch regcreds into it..."
                 sleep 10
             done
             kubectl patch serviceaccount -n $NS \
