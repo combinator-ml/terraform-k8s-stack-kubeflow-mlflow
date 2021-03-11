@@ -25,6 +25,12 @@ spec:
     istio: ${ingress_gateway_selector}
   servers:
   - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
       number: 443
       name: https
       protocol: HTTPS

@@ -41,8 +41,7 @@ module "kubeflow" {
     helm       = helm
   }
 
-  source  = "datarootsio/kubeflow/module"
-  version = "~>0.13.1"
+  source  = "./terraform-module-kubeflow"
 
   kubeflow_operator_version = "1.2.0"
   kubeflow_version    = "1.1.0"
