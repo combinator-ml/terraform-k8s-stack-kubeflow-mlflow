@@ -49,6 +49,7 @@ spec:
   gateways:
   - kubeflow-gateway
   hosts:
+  - "*"
   - ${dns_record}.${domain_name}
   http:
   - match:
@@ -71,6 +72,7 @@ spec:
   gateways:
   - kubeflow-gateway
   hosts:
+  - "*"
   - ${dns_record}.${domain_name}
   http:
   - match:
