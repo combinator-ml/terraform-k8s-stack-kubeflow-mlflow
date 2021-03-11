@@ -51,8 +51,13 @@ module "kubeflow" {
   domain_name         = "kubeflow.local"
   letsencrypt_email   = "hello@combinator.ml"
   #kubeflow_components = ["jupyter", "pipelines"]
-}
 
+  static_email = "admin@example.com"
+  # bcrypt hash of the string "password"
+  static_password_hash = "\$2a\$10\$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+  static_username = "admin"
+  static_user_id = "08a8684b-db88-4b73-90a9-3cd1661f5466"
+}
 
 module "mlflow" {
   source  = "terraform-module/release/helm"
