@@ -46,7 +46,7 @@ module "kubeflow" {
 
   kubeflow_operator_version = "1.2.0"
   kubeflow_version    = "1.1.0"
-  use_cert_manager    = false
+  use_cert_manager    = true
   install_istio        = true
   install_cert_manager = true
   domain_name         = "kubeflow.local"
