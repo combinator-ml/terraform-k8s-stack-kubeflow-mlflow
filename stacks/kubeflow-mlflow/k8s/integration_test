@@ -6,11 +6,16 @@ export KUBECONFIG=$(pwd)/kubeconfig
 ./testctl-rsync.sh main.tf /root
 ./testctl-rsync.sh conf /root/
 ./testctl-rsync.sh terraform-module-kubeflow /root/
+./testctl-rsync.sh regcreds.sh /root/
 
 # How to iterate quickly without getting a new VM every time:
 #./testctl-ssh.sh -- /snap/bin/juju destroy model kf
 #./testctl-ssh.sh -- /snap/bin/juju destroy controller
 #./testctl-ssh.sh -- /snap/bin/juju unregister controller
+
+# workaround docker hub ratelimits
+# you get a regcred, you get a regcred!
+./testctl-ssh.sh -- bash regcreds.sh
 
 ./testctl-ssh.sh -- terraform init
 ./testctl-ssh.sh -- terraform apply -auto-approve
