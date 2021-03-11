@@ -87,8 +87,8 @@ kubeflow,tf-job-operator"
 
 for NS_SA in $NS_AND_SA ; do
         (
-            NS=$(echo $NS_SA |cut -d , -f 0)
             NS=$(echo $NS_SA |cut -d , -f 1)
+            NS=$(echo $NS_SA |cut -d , -f 2)
             while ! kubectl get ns $NS 2>/dev/null; do
                 echo "waiting for ns $NS to be created so we can patch SA $SA in it..."
                 sleep 10
