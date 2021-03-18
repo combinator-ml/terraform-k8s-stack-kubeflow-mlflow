@@ -1,3 +1,16 @@
-# MLOps Stacks
+# Kubeflow + MLflow
 
-Example MLOps stacks that span training, deployment & monitoring.
+How to install locally:
+
+```
+cd k8s
+terraform apply
+```
+
+
+How to install on AWS:
+
+```
+cd aws
+terraform apply
+```
