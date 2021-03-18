@@ -1,16 +1,14 @@
 # Kubeflow + MLflow
 
-How to install locally:
+Try easily with testfaster (get a free account at [https://testfaster.ci](https://testfaster.ci) and then run the commands at [https://testfaster.ci/access_token](https://testfaster.ci/access_token)
 
 ```
-cd k8s
-terraform apply
-```
-
-
-How to install on AWS:
+./integration_test
 
 ```
-cd aws
+Or deploy against a k8s cluster:
+
+```
+TODO: edit tfvars instructions
 terraform apply
 ```
