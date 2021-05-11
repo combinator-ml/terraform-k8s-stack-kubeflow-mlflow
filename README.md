@@ -1,5 +1,14 @@
-# Kubeflow + MLflow + Boxkite + Prometheus + Grafana in Kubernetes
+# Kubeflow + MLflow
 
-This directory includes the terraform needed to spin up the above stack.
+Try easily with testfaster (get a free account at [https://testfaster.ci](https://testfaster.ci) and then run the commands at [https://testfaster.ci/access_token](https://testfaster.ci/access_token)).
 
-Try the [easy online tutorial](https://boxkite.ml/en/latest/tutorials/kubeflow-mlflow/).
+```
+./integration_test
+```
+
+Or deploy against a k8s cluster:
+
+```
+TODO: edit tfvars instructions
+terraform apply
+```
