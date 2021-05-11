@@ -30,7 +30,7 @@ provider "helm" {
 
 resource "kubernetes_namespace" "ns" {
   metadata {
-    name = "kf"
+    name = "mlflow"
   }
 }
 
@@ -58,7 +58,7 @@ module "kubeflow" {
 
 module "mlflow" {
   source  = "terraform-module/release/helm"
-  repository = "https://larribas.me/helm-charts"
+  repository = "./charts"
   namespace  = kubernetes_namespace.ns.metadata.0.name
 
   app = {
@@ -72,7 +72,7 @@ module "mlflow" {
   }
 
   values = [
-    "${file("conf/mlflow_values.yaml")}"
+    file("conf/mlflow_values.yaml")
   ]
 
   set = [
@@ -99,7 +99,7 @@ module "minio" {
   }
 
   values = [
-    "${file("conf/minio_values.yaml")}"
+    file("conf/minio_values.yaml")
   ]
 
   set = [
@@ -108,7 +108,7 @@ module "minio" {
       value = "minio"
     },{
       name  = "secretKey"
-      value = "minio-minio"
+      value = "minio123"
     },{
       name  = "generate-name"
       value = "minio/minio"
@@ -118,6 +118,34 @@ module "minio" {
     }
   ]
 }
+
+module "prometheus-grafana" {
+  source  = "terraform-module/release/helm"
+  repository = "./charts"
+  namespace  = kubernetes_namespace.ns.metadata.0.name
+
+  app = {
+    chart      = "prometheus-grafana"
+    version    = "11.1.5"
+    name       = "prometheus-grafana"
+    force_update  = true
+    wait          = false
+    recreate_pods = false
+    deploy        = 1
+  }
+
+  values = [
+    file("conf/prometheus_grafana_values.yaml")
+  ]
+
+  set = [
+    {
+      name  = "grafana.adminPassword"
+      value = "grafana123"
+    }
+  ]
+}
+
 
 module "mysql" {
   source  = "terraform-module/release/helm"
@@ -135,12 +163,22 @@ module "mysql" {
   }
 
   values = [
-    "${file("conf/mysql_values.yaml")}"
+    file("conf/mysql_values.yaml")
   ]
 
 }
 
-resource "kubernetes_service" "mlflow-external" {
+resource "kubernetes_secret" "mysql_password" {
+  metadata {
+    name      = "mlflow-mysql"
+    namespace = kubernetes_namespace.ns.metadata.0.name
+  }
+  data = {
+    password = "mysql123"
+  }
+}
+
+resource "kubernetes_service" "mlflow_external" {
   metadata {
     name      = "mlflow-external"
     namespace = kubernetes_namespace.ns.metadata.0.name
@@ -159,26 +197,26 @@ resource "kubernetes_service" "mlflow-external" {
   }
 }
 
-resource "kubernetes_service" "minio-external" {
+resource "kubernetes_service" "grafana_external" {
   metadata {
-    name      = "minio-external"
+    name      = "grafana-external"
     namespace = kubernetes_namespace.ns.metadata.0.name
   }
   spec {
     selector = {
-      "app" = "minio"
-      "release" = "minio"
+      "app.kubernetes.io/instance" = "prometheus-grafana"
+      "app.kubernetes.io/name" = "grafana"
     }
     type = "NodePort"
     port {
       node_port   = 30650
-      port        = 9000
-      target_port = 9000
+      port        = 80
+      target_port = 3000
     }
   }
 }
 
-resource "kubernetes_service" "istio-external" {
+resource "kubernetes_service" "istio_external" {
   metadata {
     name      = "istio-external"
     namespace = "istio-system"

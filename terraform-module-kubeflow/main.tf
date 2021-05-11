@@ -1,209 +1,59 @@
 terraform {
+  required_version = "~> 0.13"
   required_providers {
-    k8s = {
-      version = ">= 0.8.0"
-      source  = "banzaicloud/k8s"
+    helm = {
+      source = "hashicorp/helm"
     }
     kubernetes = {
-      version = "= 1.13.3"
+      source = "hashicorp/kubernetes"
+    }
+    k8s = {
+      source  = "banzaicloud/k8s"
+      version = "0.8.2"
     }
   }
-  required_version = ">= 0.12"
 }
 
-provider "kubernetes" {
-  config_path    = "/root/.kube/config"
-  config_context = "minikube"
-}
+provider "k8s" {}
 
-provider "k8s" {
-  config_path    = "/root/.kube/config"
-  config_context = "minikube"
-}
+provider "helm" {}
 
-provider "helm" {
-  kubernetes {
-   config_path    = "/root/.kube/config"
-   config_context = "minikube"
- }
-}
+provider "kubernetes" {}
 
-resource "kubernetes_namespace" "ns" {
-  metadata {
-    name = "mlflow"
+module "auth" {
+  depends_on = [module.istio, k8s_manifest.kubeflow_application_crd]
+  providers = {
+    kubernetes = kubernetes
+    k8s        = k8s
   }
+  source             = "./auth"
+  application_secret = var.oidc_client_secret
+  client_id          = var.oidc_client_id
+  domain_name        = var.domain_name
+  issuer             = var.oidc_issuer
+  istio_namespace    = var.istio_namespace
+  oidc_auth_url      = var.oidc_auth_url
+  oidc_redirect_url  = var.oidc_redirect_url
+  userid_claim       = var.oidc_userid_claim
 }
 
-module "kubeflow" {
+module "istio" {
+  depends_on = [helm_release.cert_manager]
+  count      = var.install_istio ? 1 : 0
   providers = {
     kubernetes = kubernetes
     k8s        = k8s
     helm       = helm
   }
-
-  source  = "./terraform-module-kubeflow"
-
-  kubeflow_operator_version = "1.2.0"
-  kubeflow_version    = "1.1.0"
-  use_cert_manager    = true
-  install_istio        = true
-  install_cert_manager = true
-  domain_name         = "kubeflow.local"
-  letsencrypt_email   = "hello@combinator.ml"
-  #kubeflow_components = ["jupyter", "pipelines"]
-
-  # default login is admin@kubeflow.org and 12341234
-}
-
-
-module "mlflow" {
-  source  = "terraform-module/release/helm"
-  repository = "./helm-mlflow"
-  namespace  = kubernetes_namespace.ns.metadata.0.name
-
-  app = {
-    chart      = "mlflow"
-    version    = "1.0.1"
-    name       = "mlflow"
-    force_update  = true
-    wait          = false
-    recreate_pods = false
-    deploy        = 1
-  }
-
-  values = [
-    file("conf/mlflow_values.yaml")
-  ]
-
-  set = [
-    {
-      name  = "prometheus.expose"
-      value = true
-    }
-  ]
-}
-
-module "minio" {
-  source  = "terraform-module/release/helm"
-  repository = "https://helm.min.io/"
-  namespace  = kubernetes_namespace.ns.metadata.0.name
-
-  app = {
-    chart      = "minio"
-    version    = "8.0.9"
-    name       = "minio"
-    force_update  = true
-    wait          = false
-    recreate_pods = false
-    deploy        = 1
-  }
-
-  values = [
-    file("conf/minio_values.yaml")
-  ]
-
-  set = [
-    {
-      name  = "accessKey"
-      value = "minio"
-    },{
-      name  = "secretKey"
-      value = "minio123"
-    },{
-      name  = "generate-name"
-      value = "minio/minio"
-    },{
-      name  = "service.port"
-      value = 9000
-    }
-  ]
-}
-
-module "mysql" {
-  source  = "terraform-module/release/helm"
-  repository = "https://charts.bitnami.com/bitnami"
-  namespace  = kubernetes_namespace.ns.metadata.0.name
-
-  app = {
-    chart      = "mysql"
-    version    = "8.0.0"
-    name       = "mysql"
-    force_update  = true
-    wait          = false
-    recreate_pods = false
-    deploy        = 1
-  }
-
-  values = [
-    file("conf/mysql_values.yaml")
-  ]
-
-}
-
-resource "kubernetes_secret" "mysql_password" {
-  metadata {
-    name      = "mlflow-mysql"
-    namespace = kubernetes_namespace.ns.metadata.0.name
-  }
-  data = {
-    password = "mysql123"
-  }
-}
-
-resource "kubernetes_service" "mlflow_external" {
-  metadata {
-    name      = "mlflow-external"
-    namespace = kubernetes_namespace.ns.metadata.0.name
-  }
-  spec {
-    selector = {
-      "app.kubernetes.io/instance" = "mlflow"
-      "app.kubernetes.io/name" = "mlflow"
-    }
-    type = "NodePort"
-    port {
-      node_port   = 30600
-      port        = 80
-      target_port = 80
-    }
-  }
-}
-
-resource "kubernetes_service" "minio_external" {
-  metadata {
-    name      = "minio-external"
-    namespace = kubernetes_namespace.ns.metadata.0.name
-  }
-  spec {
-    selector = {
-      "app" = "minio"
-      "release" = "minio"
-    }
-    type = "NodePort"
-    port {
-      node_port   = 30650
-      port        = 9000
-      target_port = 9000
-    }
-  }
-}
-
-resource "kubernetes_service" "istio_external" {
-  metadata {
-    name      = "istio-external"
-    namespace = "istio-system"
-  }
-  spec {
-    selector = {
-      "app" = "istio-ingressgateway"
-      "istio" = "ingressgateway"
-    }
-    type = "NodePort"
-    port {
-      node_port   = 31380
-      port        = 80
-      target_port = 8080
-    }
-  }
-  depends_on = [module.kubeflow]
+  source                      = "./istio"
+  domain_name                 = var.domain_name
+  ingress_gateway_annotations = var.ingress_gateway_annotations
+  ingress_gateway_ip          = var.ingress_gateway_ip
+  ingress_gateway_selector    = var.ingress_gateway_selector
+  istio_namespace             = var.istio_namespace
+  istio_operator_namespace    = var.istio_operator_namespace
+  use_cert_manager            = var.use_cert_manager
+  certificate_name            = var.certificate_name
+  istio_version               = var.istio_version
+// TODO: add an expose_http toggle here, which controls the http stanza in gateway-vs.yaml
 }
