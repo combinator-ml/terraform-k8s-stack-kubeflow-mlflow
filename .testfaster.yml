@@ -101,7 +101,7 @@ base:
     set -euo pipefail
     git clone https://github.com/combinator-ml/terraform-k8s-stack-kubeflow-mlflow
     cd terraform-k8s-stack-kubeflow-mlflow
-    git checkout d608abf3464f0e6435239ae8771449698c65cb19
+    git checkout 06a799fa5f9520e375576a2b2676eb51e966a859
     terraform init
     terraform apply -auto-approve
 
