@@ -7,24 +7,35 @@ terraform {
     kubernetes = {
       version = "= 1.13.3"
     }
+    // TODO: make this switchable (between eks and testfaster)
+    aws        = ">= 3.22.0"
+    local      = ">= 1.4"
+    random     = ">= 2.1"
   }
-  required_version = ">= 0.12"
+  required_version = ">= 0.13.1"
 }
 
+// TODO: make this switchable (between eks and testfaster)
 provider "kubernetes" {
-  config_path    = "/root/.kube/config"
-  config_context = "minikube"
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+  load_config_file       = false
 }
 
 provider "k8s" {
-  config_path    = "/root/.kube/config"
-  config_context = "minikube"
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+  load_config_file       = false
 }
 
 provider "helm" {
   kubernetes {
-   config_path    = "/root/.kube/config"
-   config_context = "minikube"
+   host                   = data.aws_eks_cluster.cluster.endpoint
+   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+   token                  = data.aws_eks_cluster_auth.cluster.token
+   load_config_file       = false
  }
 }
 
