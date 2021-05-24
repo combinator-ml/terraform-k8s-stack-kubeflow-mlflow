@@ -48,5 +48,9 @@ resource "null_resource" "wait_crds" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command     = "while [[ \"$(kubectl get crds | grep 'istio.io' | wc -l)\" -ne \"25\" ]]; do echo \"Waiting for CRDs\";  sleep 5; done"
+    environment = {
+      // TODO: don't explicitly depend on eks module, make this swappable for testfaster or other cloud backends.
+      KUBECONFIG = module.eks.kubeconfig_filename
+    }
   }
 }
