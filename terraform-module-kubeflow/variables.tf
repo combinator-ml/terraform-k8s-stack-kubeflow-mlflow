@@ -147,3 +147,7 @@ variable "kubeflow_operator_version" {
   default     = "1.0.0"
   description = "The version of kubeflow operator to install"
 }
+
+variable "kubeconfig_file" {
+  type = string
+}

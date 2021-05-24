@@ -51,6 +51,9 @@ module "kubeflow" {
     helm       = helm
   }
 
+  // TODO: don't explicitly depend on eks module, make this swappable for testfaster or other cloud backends.
+  kubeconfig_file = module.eks.kubeconfig_filename
+
   source  = "./terraform-module-kubeflow"
 
   kubeflow_operator_version = "1.2.0"

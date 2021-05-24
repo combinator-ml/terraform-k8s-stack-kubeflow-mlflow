@@ -45,6 +45,7 @@ module "istio" {
     k8s        = k8s
     helm       = helm
   }
+  kubeconfig_file             = var.kubeconfig_file
   source                      = "./istio"
   domain_name                 = var.domain_name
   ingress_gateway_annotations = var.ingress_gateway_annotations

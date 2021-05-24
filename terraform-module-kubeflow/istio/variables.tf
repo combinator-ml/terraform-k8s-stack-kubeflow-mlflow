@@ -42,3 +42,7 @@ variable "istio_version" {
   type = string
   default = "1.6.8"
 }
+
+variable "kubeconfig_file" {
+  type = string
+}
