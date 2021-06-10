@@ -97,7 +97,11 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = local.cluster_name
   cluster_version = "1.20"
-  subnets         = module.vpc.private_subnets
+  # Only deploy into a single subnet for now. This is to simplify rescheduling
+  # of resources with PVCs (e.g. scaling down the cluster doesn't accidentally
+  # leave some nodes full in the same zone that a pod needs scheduling because it
+  # has a PVC there).
+  subnets         = [module.vpc.private_subnets[0]]
 
   tags = {
     Environment = "test"
