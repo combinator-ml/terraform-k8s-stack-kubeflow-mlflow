@@ -115,13 +115,6 @@ module "eks" {
       asg_desired_capacity          = 3
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
     },
-    {
-      name                          = "worker-group-2"
-      instance_type                 = "p3.2xlarge"
-      additional_userdata           = "echo foo bar"
-      additional_security_group_ids = [aws_security_group.worker_group_mgmt_two.id]
-      asg_desired_capacity          = 0
-    },
   ]
 
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
