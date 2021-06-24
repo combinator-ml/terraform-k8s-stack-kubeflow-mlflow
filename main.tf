@@ -11,21 +11,27 @@ terraform {
   required_version = ">= 0.12"
 }
 
+resource "local_file" "optional_kubeconfig" {
+    count    = var.kubeconfig == "" ? 0 : 1
+    content  = var.kubeconfig
+    filename = "${path.module}/kubeconfig"
+}
+
 provider "kubernetes" {
-  config_path    = "/root/.kube/config"
-  config_context = "minikube"
+  config_path = var.kubeconfig == "" ? "/root/.kube/config" : "${path.module}/kubeconfig"
+  depends_on = var.kubeconfig == "" ? [] : [local_file.optional_kubeconfig]
 }
 
 provider "k8s" {
-  config_path    = "/root/.kube/config"
-  config_context = "minikube"
+  config_path = var.kubeconfig == "" ? "/root/.kube/config" : "${path.module}/kubeconfig"
+  depends_on = var.kubeconfig == "" ? [] : [local_file.optional_kubeconfig]
 }
 
 provider "helm" {
   kubernetes {
-   config_path    = "/root/.kube/config"
-   config_context = "minikube"
- }
+    config_path = var.kubeconfig == "" ? "/root/.kube/config" : "${path.module}/kubeconfig"
+  }
+  depends_on = var.kubeconfig == "" ? [] : [local_file.optional_kubeconfig]
 }
 
 resource "kubernetes_namespace" "ns" {
