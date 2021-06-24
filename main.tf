@@ -18,16 +18,16 @@ resource "local_file" "optional_kubeconfig" {
 }
 
 provider "kubernetes" {
-  config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig.filename
+  config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
 }
 
 provider "k8s" {
-  config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig.filename
+  config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
 }
 
 provider "helm" {
   kubernetes {
-    config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig.filename
+    config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
   }
 }
 
