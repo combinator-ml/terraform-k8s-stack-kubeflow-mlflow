@@ -1,3 +1,8 @@
+variable "kubeconfig_path" {
+  type        = string
+  default     = ""
+}
+
 variable "install_istio" {
   type        = bool
   default     = false

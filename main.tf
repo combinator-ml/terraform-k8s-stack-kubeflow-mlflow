@@ -17,17 +17,21 @@ resource "local_file" "optional_kubeconfig" {
     filename = "${path.module}/kubeconfig"
 }
 
+locals {
+  kubeconfig_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
+}
+
 provider "kubernetes" {
-  config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
+  config_path = local.kubeconfig_path
 }
 
 provider "k8s" {
-  config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
+  config_path = local.kubeconfig_path
 }
 
 provider "helm" {
   kubernetes {
-    config_path = var.kubeconfig == "" ? "/root/.kube/config" : local_file.optional_kubeconfig[0].filename
+    config_path = local.kubeconfig_path
   }
 }
 
@@ -53,6 +57,7 @@ module "kubeflow" {
   install_cert_manager = true
   domain_name         = "kubeflow.local"
   letsencrypt_email   = "hello@combinator.ml"
+  kubeconfig_path     = local.kubeconfig_path
   #kubeflow_components = ["jupyter", "pipelines"]
 
   # default login is admin@kubeflow.org and 12341234

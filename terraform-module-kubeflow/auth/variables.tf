@@ -1,3 +1,8 @@
+variable "kubeconfig_path" {
+  type = string
+  default = ""
+}
+
 variable "domain_name" {
   type = string
 }

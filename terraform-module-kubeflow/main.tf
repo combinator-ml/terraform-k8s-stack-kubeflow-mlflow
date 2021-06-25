@@ -14,6 +14,8 @@ terraform {
   }
 }
 
+// TODO: be passed these providers, rather than defining them as empty...
+
 provider "k8s" {}
 
 provider "helm" {}
@@ -55,5 +57,6 @@ module "istio" {
   use_cert_manager            = var.use_cert_manager
   certificate_name            = var.certificate_name
   istio_version               = var.istio_version
+  kubeconfig_path             = var.kubeconfig_path
 // TODO: add an expose_http toggle here, which controls the http stanza in gateway-vs.yaml
 }
