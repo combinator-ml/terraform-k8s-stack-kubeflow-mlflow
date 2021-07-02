@@ -121,7 +121,7 @@ module "eks" {
       additional_userdata           = "echo foo bar"
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_two.id]
       asg_desired_capacity          = 0
-      kubelet_extra_args            = "--register-with-taints gpu=true:NoSchedule"
+      kubelet_extra_args            = "--register-with-taints nvidia.com/gpu=true:NoSchedule"
     },
   ]
 
