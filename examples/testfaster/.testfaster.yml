@@ -92,7 +92,7 @@ runtime:
   memory: 32GB
   disk: 200GB
 prewarm_pool_size: 4
-max_pool_size: 16
+max_pool_size: 24
 default_lease_timeout: "1h"
 pool_sleep_timeout: "1w"
 shared: true
