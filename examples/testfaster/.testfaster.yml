@@ -84,6 +84,7 @@ base:
     cd examples/testfaster
     terraform init
     KUBE_CONFIG_PATH=~/.kube/config terraform apply -auto-approve
+    echo "Luke's version"
 
   kubernetes_version: v1.17.11
 
