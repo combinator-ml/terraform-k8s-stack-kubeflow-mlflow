@@ -81,7 +81,7 @@ base:
     echo "bump cache 1"
     git clone https://github.com/combinator-ml/terraform-k8s-stack-kubeflow-mlflow repo
     cd repo
-    git checkout 652f1fc20fa07e96bb9d4b3386dba839310194dd
+    git checkout 7dc9f2ce377b2224641e7ca078cf8e6271258bf2
     cd examples/testfaster
     terraform init
     KUBE_CONFIG_PATH=~/.kube/config terraform apply -auto-approve
