@@ -78,6 +78,7 @@ base:
   prewarm_script: |-
     #!/bin/bash
     set -euo pipefail
+    echo "bump cache 1"
     git clone https://github.com/combinator-ml/terraform-k8s-stack-kubeflow-mlflow repo
     cd repo
     git checkout 652f1fc20fa07e96bb9d4b3386dba839310194dd
